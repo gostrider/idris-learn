@@ -55,9 +55,9 @@ getEntry pos store =
 
 
 member_of : (item : String) -> (store : DataStore) -> Maybe (String, DataStore)
-member_of item store = case ?is_one_of of
-                            [] => Just ("Not found\n", store)
-                            found => Just ("Found\n" ++ show found, store)
+member_of item ori@(MkData size items') = case Data.Vect.filter (Strings.isInfixOf item) items' of
+                                           (Z ** []) => Just ("Not found\n", ori)
+                                           (x ** pf) => Just ("Found\n" ++ show pf ++ "\n", ori)
 
 
 processInput : DataStore -> String -> Maybe (String, DataStore)
