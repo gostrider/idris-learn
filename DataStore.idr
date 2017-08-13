@@ -54,10 +54,8 @@ getEntry pos store =
       Just id => Just (index id store_items ++ "\n", store)
 
 
-member_of : (item : String) -> (store : DataStore) -> Maybe (String, DataStore)
-member_of item ori@(MkData size items') = case Data.Vect.filter (Strings.isInfixOf item) items' of
-                                           (Z ** []) => Just ("Not found\n", ori)
-                                           (x ** pf) => Just ("Found\n" ++ show pf ++ "\n", ori)
+member_of : (item : String) -> (store : DataStore) -> (m : Nat ** Vect m String)
+member_of item (MkData size items') = Vect.mapMaybe (\x => Just (show (Data.Fin.finToNat x) ++ ": " ++ (Vect.index x store))) items'
 
 
 processInput : DataStore -> String -> Maybe (String, DataStore)
@@ -66,7 +64,7 @@ processInput store inp = case parse inp of
                               (Just (Add item)) => Just ("ID " ++ show (size store) ++ "\n", addToStore store item)
                               (Just (Get pos))  => getEntry pos store
                               (Just Size)       => Just (show (size store) ++ "\n", store)
-                              (Just (Search item)) => member_of item store
+                              (Just (Search item)) => Just ("", store)
                               (Just Quit)       => Nothing
 
 
