@@ -24,6 +24,11 @@ member_of : Vect n String -> List (Fin n)
 member_of = Data.Vect.findIndices (Strings.isInfixOf "a")
 
 
-get_member : (store : Vect n String) -> (idx : List (Fin n)) -> (m : Nat ** Vect m String)
+get_member : (store : Vect n String) -> (idx : List (Fin n)) -> (m : Nat ** Vect m (Nat, String))
 get_member store idx =
-  Vect.mapMaybe (\x => Just (show (Data.Fin.finToNat x) ++ ": " ++ (Vect.index x store))) (Vect.fromList idx)
+  Vect.mapMaybe (\x => Just (Data.Fin.finToNat x, Vect.index x store)) (Vect.fromList idx)
+
+
+flatten : List String -> String
+flatten [] = ""
+flatten (x :: xs) = x ++ flatten xs
