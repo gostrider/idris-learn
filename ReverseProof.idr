@@ -46,3 +46,12 @@ myReverse {n = S k} (x :: xs) =
     rewrite plusCommutative 1 k
     -- Rewrite rule replaces S k with plus k 1 in this hole
     in result
+
+
+myReverse2 : Vect n elem -> Vect n elem
+myReverse2 [] = []
+myReverse2 (x :: xs) = reverseProof (myReverse2 xs ++ [x])
+  where
+    reverseProof : Vect (k + 1) elem -> Vect (S k) elem
+    reverseProof {k} xs = rewrite plusCommutative 1 k
+                          in xs
