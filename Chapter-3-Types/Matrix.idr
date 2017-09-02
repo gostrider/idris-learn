@@ -2,6 +2,7 @@ module Matrix
 
 import Data.Vect
 
+
 createEmpties : Vect n (Vect 0 elem)
 createEmpties = replicate _ []
 

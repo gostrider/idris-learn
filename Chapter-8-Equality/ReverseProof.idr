@@ -1,6 +1,5 @@
 module ReverseProof
 
-
 import Data.Vect
 
 

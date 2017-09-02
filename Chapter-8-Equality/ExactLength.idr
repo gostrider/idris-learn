@@ -1,6 +1,5 @@
 module exactLength
 
-
 import Data.Vect
 
 

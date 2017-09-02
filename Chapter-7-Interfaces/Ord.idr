@@ -1,10 +1,12 @@
 module Ord
 
+
 record Album where
   constructor MkAlbum
   artist : String
   title : String
   year : Integer
+
 
 help : Album
 help = MkAlbum "The Beatles" "Help" 1965

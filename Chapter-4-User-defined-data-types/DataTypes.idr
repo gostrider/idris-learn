@@ -1,8 +1,10 @@
 module DataTypes
 
+
 data Shape = Triangle Double Double
            | Rectangle Double Double
            | Circle Double
+
 
 data Picture = Primitive Shape
              | Combine Picture Picture
@@ -23,6 +25,7 @@ circle = Primitive (Circle 5)
 triangle : Picture
 triangle = Primitive (Triangle 10 10)
 
+
 rectangle : Picture
 rectangle = Primitive (Rectangle 20 10)
 
@@ -41,17 +44,21 @@ pictureArea (Combine pic pic1) = pictureArea pic + pictureArea pic1
 pictureArea (Rotate x pic) = pictureArea pic
 pictureArea (Translate x y pic) = pictureArea pic
 
+
 data PowerSource = Petrol | Pedal
+
 
 data Vehicle : PowerSource -> Type where
   Bicycle : Vehicle Pedal
   Car : (fuel : Nat) -> Vehicle Petrol
   Bus : (fuel : Nat) -> Vehicle Petrol
 
+
 wheels : Vehicle power -> Nat
 wheels Bicycle = 2
 wheels (Car fuel) = 4
 wheels (Bus fuel) = 4
+
 
 refuel : Vehicle Petrol -> Vehicle Petrol
 refuel (Car fuel) = Car 100
