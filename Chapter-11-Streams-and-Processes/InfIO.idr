@@ -30,6 +30,7 @@ data Fuel = Dry
           | More (Lazy Fuel)
 
 
+export
 forever : Fuel
 forever = More forever
 
