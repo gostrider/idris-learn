@@ -6,9 +6,9 @@ data InfIO : Type where
 
 
 loopPrint : String -> InfIO
---loopPrint msg = Do (putStrLn msg) (\_ => loopPrint msg)
-loopPrint msg = do putStrLn msg
-                   loopPrint msg
+loopPrint msg = Do (putStrLn msg) (\_ => loopPrint msg)
+-- loopPrint msg = do putStrLn msg
+--                    loopPrint msg
 
 {-
 
@@ -25,7 +25,7 @@ data Fuel = Dry
           | More Fuel
 -}
 
-
+public export
 data Fuel = Dry
           | More (Lazy Fuel)
 
@@ -44,3 +44,6 @@ run : Fuel -> InfIO -> IO ()
 run Dry p = putStrLn "Out of fuel"
 run (More fuel) (Do c f) = do res <- c
                               run fuel (f res)
+
+-- Converting RunIO a -> IO a
+-- run : Fuel -> RunIO a -> IO (Maybe a)
