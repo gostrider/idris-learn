@@ -16,6 +16,22 @@ interface StateMonad.Functor f => APplicative (f : Type -> Type) where
   pure : a -> f a
   (<*>) : f (a -> b) -> f a -> f b
 
+mutual
+  Functor (State stateType) where
+    map f x = do x' <- x
+                 Pure (f x')
+
+
+  Applicative (State stateType) where
+    pure = Pure
+    (<*>) f a = do f' <- f
+                   a' <- a
+                   pure (f' a')
+
+
+  Monad (State stateType) where
+    (>>=) = Bind
+
 
 addIfPositive : Integer -> State Integer Bool
 addIfPositive val =
