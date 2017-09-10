@@ -1,5 +1,8 @@
 module ArithState
 
+import Data.Primitives.Views
+import System
+
 
 record Score where
   constructor MkScore
@@ -78,30 +81,69 @@ forever : Fuel
 forever = More forever
 
 
-runCommand : Command a -> IO a
-runCommand (PutStr x) = putStr x
-runCommand GetLine = getLine
-runCommand (Pure x) = pure x
-runCommand (Bind x f) = runCommand x >>= (\x' => runCommand $ f x')
-runCommand GetRandom = ?runCommand_rhs_1
-runCommand GetGameState = ?runCommand_rhs_2
-runCommand (PutGameState x) = ?runCommand_rhs_3
+runCommand : Stream Int -> GameState -> Command a -> IO (a, Stream Int, GameState)
+runCommand rnds state (PutStr x) = do putStr x
+                                      pure ((), rnds, state)
+
+runCommand rnds state GetLine = do str <- getLine
+                                   pure (str, rnds, state)
+
+runCommand (val :: rnds) state GetRandom =
+  pure (getRandom val (difficulty state), rnds, state)
+  where
+    getRandom : Int -> Int -> Int
+    getRandom val max with (divides val max)
+      getRandom val 0 | DivByZero = 1
+      getRandom ((max * div) + rem) max | (DivBy prf) = abs rem + 1
+
+runCommand rnds state GetGameState = pure (state, rnds, state)
+runCommand rnds state (PutGameState newState) = pure ((), rnds, newState)
+runCommand rnds state (Pure val) = pure (val, rnds, state)
+runCommand rnds state (Bind c f) = do
+  (res, rnds', state') <- runCommand rnds state c
+  runCommand rnds' state' $ f res
 
 
-run : Fuel -> ConsoleIO a -> IO (Maybe a)
-run Dry p = pure Nothing
-run fuel (Quit y) = do pure (Just y)
-run (More fuel) (Do c f) = runCommand c >>= (\c' => run fuel $ f c')
+run : Fuel -> Stream Int -> GameState -> ConsoleIO a -> IO (Maybe a, Stream Int, GameState)
+run fuel rnds state (Quit x) = pure (Just x, rnds, state)
+run fuel rnds state (Do c f) = do
+  (x, rnds', state') <- runCommand rnds state c
+  run fuel rnds' state' $ f x
+run Dry rnds state p = pure (Nothing, rnds, state)
+
+
+randoms : Int -> Stream Int
+randoms seed = let seed' = 1664525 * seed + 1013904223
+               in (seed' `shiftR` 2) :: randoms seed'
+
+
+-- Quiz Logic
+
+data Input = Answer Int
+           | QuidCmd
+
+
+readInput : (prompt : String) -> Command Input
+readInput prompt = do
+  PutStr prompt
+  answer <- GetLine
+  if toLower answer == "quit"
+    then Pure QuidCmd
+    else Pure (Answer (cast answer))
 
 
 mutual
   correct : ConsoleIO GameState
-  correct = ?correct_rhs
+  correct = do PutStr "Correct "
+               st <- GetGameState
+               PutGameState (addCorrect st)
+               quiz
 
   wrong : Int -> ConsoleIO GameState
-  wrong ans = ?wrong_rhs
-
-  -- readInput : (prompt : String) -> Command Input
+  wrong ans = do PutStr ("Wrong, the answer is " ++ show ans ++ "\n")
+                 st <- GetGameState
+                 PutGameState (addWrong st)
+                 quiz
 
   quiz : ConsoleIO GameState
   quiz = do
@@ -113,3 +155,12 @@ mutual
     case input of
       Answer ans => if ans == num1 * num2 then correct else wrong (num1 * num2)
       QuitCmd => Quit st
+
+
+partial
+main : IO ()
+main = do
+  seed <- time
+  (Just score, _, state) <- run forever (randoms (fromInteger seed)) initState quiz
+    | _ => putStrLn "Ran out of fuel"
+  putStrLn ("Final score: " ++ show state)
