@@ -38,7 +38,8 @@ run fuel (Request (MkMessage process) msg) = do
     then do
       Just x <- unsafeRecv Nat chan | Nothing => pure (Just Nothing)
       pure $ Just $ Just x
-    else pure (Just Nothing)
+    else
+      pure (Just Nothing)
 
 run fuel (Respond calc) = do
   Just sender <- listen 1               | Nothing => pure (Just Nothing)
