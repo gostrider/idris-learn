@@ -61,9 +61,11 @@ run fuel (c >>= f) = do
   Just x <- run fuel c | Nothing => pure Nothing
   run fuel $ f x
 
+
 partial
 forever : Fuel
 forever = More forever
+
 
 partial
 runProc : Process () -> IO ()
