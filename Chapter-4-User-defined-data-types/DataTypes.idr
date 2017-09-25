@@ -1,17 +1,27 @@
 module DataTypes
 
-
+public export
 data Shape = Triangle Double Double
            | Rectangle Double Double
            | Circle Double
 
 
+{- Same as
+data Shape : Type where
+  Triangle : Double -> Double -> Shape
+  Rectangle : Double -> Double -> Shape
+  Circle : Double -> Shape
+-}
+
+
+public export
 data Picture = Primitive Shape
              | Combine Picture Picture
              | Rotate Double Picture
              | Translate Double Double Picture
 
 
+export
 area : Shape -> Double
 area (Triangle x y) = 0.5 * x * y
 area (Rectangle x y) = x * y
@@ -38,6 +48,7 @@ testPicture = Combine (Translate 5 5 rectangle)
 %name Shape shape, shape1, shape2
 %name Picture pic, pic1, pic2
 
+export
 pictureArea : Picture -> Double
 pictureArea (Primitive shape) = area shape
 pictureArea (Combine pic pic1) = pictureArea pic + pictureArea pic1
