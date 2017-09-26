@@ -12,26 +12,10 @@ data Picture = Primitive Shape
              | Translate Double Double Picture
 
 
-interface Ord ty where
-  compare : ty -> ty -> Ordering
-  (<) : ty -> ty -> Bool
-  (>) : ty -> ty -> Bool
-  (<=) : ty -> ty -> Bool
-  (>=) : ty -> ty -> Bool
-  max : ty -> ty -> Bool
-  min : ty -> ty -> Bool
-
-
--- ShapePlus.Ord (ty -> Maybe ty) where
---   compare (Just a) (Just b) = ?holeOrd
-
-
-infixr 10 >-<
-
-(>-<) : ShapePlus.Ord a => Maybe a -> Maybe a -> Maybe a
-(>-<) x Nothing = x
-(>-<) Nothing y = y
-(>-<) (Just x) (Just y) = case compare x y of
+maxMaybe : Ord a => Maybe a -> Maybe a -> Maybe a
+maxMaybe x Nothing = x
+maxMaybe Nothing y = y
+maxMaybe (Just x) (Just y) = case compare x y of
                                LT => Just y
                                EQ => Just x
                                GT => Just x
@@ -53,7 +37,7 @@ pictureArea (Translate x y pic) = pictureArea pic
 biggestTriangle : Picture -> Maybe Double
 biggestTriangle (Rotate _ pic)             = biggestTriangle pic
 biggestTriangle (Translate _ _ pic)        = biggestTriangle pic
-biggestTriangle (Combine pic pic1)         = (biggestTriangle pic) >-< (biggestTriangle pic1)
+biggestTriangle (Combine pic pic1)         = maxMaybe (biggestTriangle pic) (biggestTriangle pic1)
 biggestTriangle (Primitive (Triangle x y)) = Just $ pictureArea $ Primitive $ Triangle x y
 biggestTriangle (Primitive _)              = Nothing
 
