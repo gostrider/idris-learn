@@ -1,4 +1,4 @@
-module Expr
+module Exercise_4_1
 
 import DataTypes
 
@@ -11,9 +11,9 @@ data Expr = Val Int
 
 evaluate : Expr -> Int
 evaluate (Val x) = x
-evaluate (Add x y) = ?evaluate_rhs_2
-evaluate (Sub x y) = ?evaluate_rhs_3
-evaluate (Mult x y) = ?evaluate_rhs_4
+evaluate (Add x y) = evaluate x + evaluate y
+evaluate (Sub x y) = evaluate x - evaluate y
+evaluate (Mult x y) = evaluate x * evaluate y
 
 
 maxMaybe : Ord a => Maybe a -> Maybe a -> Maybe a
@@ -37,5 +37,8 @@ testPic2 = Combine (Primitive $ Rectangle 1 3)
 
 
 biggestTriangle : Picture -> Maybe Double
-biggestTriangle (Primitive (Triangle x y)) = ?biggestTriangle_rhs_5
-biggestTriangle (Combine pic pic1) = ?biggestTriangle_rhs_2
+biggestTriangle (Rotate _ pic)             = biggestTriangle pic
+biggestTriangle (Translate _ _ pic)        = biggestTriangle pic
+biggestTriangle (Combine pic pic1)         = maxMaybe (biggestTriangle pic) (biggestTriangle pic1)
+biggestTriangle (Primitive (Triangle x y)) = Just $ pictureArea $ Primitive $ Triangle x y
+biggestTriangle (Primitive _)              = Nothing
