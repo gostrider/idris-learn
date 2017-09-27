@@ -1,19 +1,26 @@
 module Exercise_4_2
 
-data PowerSource = Petrol | Pedal
+data PowerSource = Petrol | Pedal | Electric
 
-data Vehicle p = Bicycle p
-               | Car Nat p
-               | Bus Nat p
-               | Unicycle p
-               | Motorcycle Nat p
+
+data Vehicle : PowerSource -> Type where
+  Unicycle    :                 Vehicle Pedal
+  Bicycle     :                 Vehicle Pedal
+  Motorcycle  : (fuel : Nat) -> Vehicle Petrol
+  Car         : (fuel : Nat) -> Vehicle Petrol
+  Bus         : (fuel : Nat) -> Vehicle Petrol
+
+
 
 wheels : Vehicle power -> Nat
-wheels (Bicycle x) = ?wheels_rhs_1
-wheels (Car k x) = ?wheels_rhs_2
-wheels (Bus k x) = ?wheels_rhs_3
-wheels (Unicycle x) = ?wheels_rhs_4
-wheels (Motorcycle k x) = ?wheels_rhs_5
+wheels Unicycle = 1
+wheels Bicycle = 2
+wheels (Motorcycle _) = 2
+wheels (Car _) = 4
+wheels (Bus _) = 4
 
 
 refuel : Vehicle Petrol -> Vehicle Petrol
+refuel (Motorcycle fuel) = Motorcycle 50
+refuel (Car fuel) = Car 100
+refuel (Bus fuel) = Bus 200
