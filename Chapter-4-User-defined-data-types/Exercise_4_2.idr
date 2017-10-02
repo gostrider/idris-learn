@@ -32,6 +32,7 @@ refuel (Bus fuel) = Bus 200
 
 
 {-
+Exercise 4.2.4
 Different with:
 
 vectTake : (n : Nat) -> Vect m elem -> Vect n
@@ -50,5 +51,8 @@ vectTake Z xs = []
 vectTake (S k) (x :: xs) = x :: vectTake k xs
 
 
+-- Exercise 4.2.5
 sumEntries : Num elem => (pos : Integer) -> Vect n elem -> Vect n elem -> Maybe elem
-sumEntries pos xs ys = ?sumEntries_rhs
+sumEntries {n} pos xs ys = case integerToFin pos n of
+                                Nothing => Nothing
+                                (Just x) => Just $ (index x xs) + (index x ys)
