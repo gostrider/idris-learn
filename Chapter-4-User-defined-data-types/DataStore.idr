@@ -65,19 +65,30 @@ getEntry pos store =
       -- (\x => Just (show (finToNat x) ++ ": " ++ (Vect.index x store)))
 
 
+vectLength : (a -> Bool) -> Vect n a -> Nat
+vectLength _ [] = 0
+vectLength f (x :: xs) with (f x)
+  | False = vectLength f xs
+  | True = 1 + vectLength f xs
+
+
+filter : (f : a -> Bool) -> (v : Vect n a) -> Vect (vectLength f v) a
+filter _ [] = []
+filter f (x :: xs) with (f x)
+  | False = filter f xs
+  | True = x :: filter f xs
+
+
 -- Exercise 4.3.2 & 4.3.3
 searchEntry : String -> DataStore -> Maybe (String, DataStore)
 searchEntry item store =
   let
-    matched = appendMatch item $ items store
+    matched = filter (Strings.isInfixOf item) (items store)
   in
     Just (showMatched matched, store)
       where
-        appendMatch : String -> Vect n String -> (m : Nat ** Vect m String)
-        appendMatch t = Vect.filter (Strings.isInfixOf t)
-
-        showMatched : (n : Nat ** Vect n String) -> String
-        showMatched (_ ** xs) = foldr (\x, acc => x ++ "\n" ++ acc) "" xs
+        showMatched : Vect n String -> String
+        showMatched = foldr (\x, acc => x ++ "\n" ++ acc) ""
 
 
 processInput : DataStore -> String -> Maybe (String, DataStore)
