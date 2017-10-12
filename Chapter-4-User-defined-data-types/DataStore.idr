@@ -65,14 +65,14 @@ getEntry pos store =
       -- (\x => Just (show (finToNat x) ++ ": " ++ (Vect.index x store)))
 
 
-vectLength : (a -> Bool) -> Vect n a -> Nat
-vectLength _ [] = 0
-vectLength f (x :: xs) with (f x)
-  | False = vectLength f xs
-  | True = 1 + vectLength f xs
+VectLength : (a -> Bool) -> Vect n a -> Nat
+VectLength _ [] = 0
+VectLength f (x :: xs) with (f x)
+  | False = VectLength f xs
+  | True = 1 + VectLength f xs
 
 
-filter : (f : a -> Bool) -> (v : Vect n a) -> Vect (vectLength f v) a
+filter : (f : a -> Bool) -> (v : Vect n a) -> Vect (VectLength f v) a
 filter _ [] = []
 filter f (x :: xs) with (f x)
   | False = filter f xs
