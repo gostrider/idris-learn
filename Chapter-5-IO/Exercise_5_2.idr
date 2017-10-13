@@ -6,13 +6,13 @@ data Guess = Higher Nat
            | Correct
 
 
-data VerifyInput = Valid
-                 | Invalid
+data UserInput = Just String
+               | Nothing
 
 
-validInput : String -> VerifyInput
+validInput : String -> UserInput
 validInput input = if all isDigit $ unpack input
-                   then Valid else Invalid
+                   then Just input else Nothing
 
 
 closeTo : Nat -> Nat -> Guess
@@ -30,10 +30,10 @@ display Correct    = putStrLn "Correct"
 
 guess : (target : Nat) -> IO ()
 guess target = do userGuess <- getLine
-                  case validInput userGuess of
-                    Invalid => putStrLn "Invalid input"
-                    Valid => do let guessResult = closeTo (cast userGuess) target
-                                display guessResult
-                                case guessResult of
-                                      Correct => putStrLn "End"
-                                      _ => guess target
+                  Just input <- return $ validInput userGuess
+                    | Nothing => putStrLn "Invalid input"
+                  let guessResult = (cast input) `closeTo` target
+                  display guessResult
+                  Correct <- return guessResult
+                    | _ => guess target
+                  putStrLn "End"
