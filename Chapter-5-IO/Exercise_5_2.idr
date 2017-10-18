@@ -30,6 +30,7 @@ display (Lower _)  = putStrLn "Lower the guess"
 display Correct    = putStrLn "Correct"
 
 
+-- Exercise 5.2.1
 guess : (target : Nat) -> (guesses : Nat) -> IO ()
 guess target guesses = do
   putStrLn ("Trial: " ++ show guesses)
@@ -43,7 +44,7 @@ guess target guesses = do
   putStrLn "End"
 
 
--- Exercise 5.2.3
+-- Exercise 5.2.2 & Exercise 5.2.3
 main : IO ()
 main = do
   target <- time
@@ -66,5 +67,5 @@ replWith' state msg fn = do
   case fn state input of
         Nothing => pure ()
         Just (result, state') => do
-          putStrLn ("Result: " ++ result)
+          putStrLn result
           replWith' state' result fn
