@@ -2,6 +2,9 @@ module ProductsCoProducts
 
 {-
 
+c is better than c' if m : c' -> c
+m factorizes p' & q'
+
       c'                          Int
    /  |  \                 /       |       \
 p'/   m   \ q'         p' /        m        \ q'
@@ -9,10 +12,15 @@ p'/   m   \ q'         p' /        m        \ q'
 a <---c---> b         Int <---(Int, Bool)---> Bool
     p   q                  fst           snd
 
+A product of a & b = c with 2 projections
+such that for any other c' with 2 projections
+there is a unique m : c' -> c
+
 -}
 
 m : a -> (a, Bool)
 m x = (x, True)
+
 
 fst' : (a, b) -> a
 fst' (a, _) = a
@@ -48,9 +56,7 @@ factorization p q x = (p x, q x)
 
 -}
 
-i : a -> (a, Bool)
-j : Bool -> (?next, Bool)
 
 i' : a -> (a, Bool)
-i' = m . i
+-- i' = m . i
 -- j' = m . j
