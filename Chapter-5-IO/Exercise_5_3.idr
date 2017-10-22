@@ -12,19 +12,17 @@ readToBlank = do current <- getLine
                          pure (current :: next)
 
 
-writeLines : String -> List String -> IO (Either FileError ())
-writeLines file [] = pure(Right ())
-writeLines file (line :: lines) = do writeFile file line
-                                     writeLines file lines
-
-
 readAndSave : IO ()
 readAndSave = do
   batch <- readToBlank
   putStrLn "Please enter filename:"
   fname <- getLine
-  writeLines fname batch
+  writeFile fname $ Strings.unlines batch
   putStrLn "Completed"
 
 
 readVectFile : (filename : String) -> IO (n ** Vect n String)
+readVectFile filename = do
+  Right content <- readFile filename
+    | Left err => pure (_ ** [])
+  pure (_ ** fromList $ words content)

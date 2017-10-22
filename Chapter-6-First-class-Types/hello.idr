@@ -1,9 +1,6 @@
 module Main
 
 
-main : IO ()
-main = putStrLn "runnable"
-
 StringOrInt : Bool -> Type
 StringOrInt False = String
 StringOrInt True = Int

@@ -9,17 +9,17 @@ data Format = Number Format
 %name Format fmt
 
 PrintfType : Format -> Type
-PrintfType (Number fmt) = (i : Int) -> PrintfType fmt
-PrintfType (Str fmt) = (str : String) -> PrintfType fmt
+PrintfType (Number fmt)  = (i : Int) -> PrintfType fmt
+PrintfType (Str fmt)     = (str : String) -> PrintfType fmt
 PrintfType (Lit str fmt) = PrintfType fmt
-PrintfType End = String
+PrintfType End           = String
 
 
 printfFmt : (fmt : Format) -> (acc : String) -> PrintfType fmt
-printfFmt (Number fmt) acc  = \i => printfFmt fmt (acc ++ show i)
-printfFmt (Str fmt) acc     = \str => printfFmt fmt (acc ++ str)
+printfFmt (Number fmt)  acc = \i   => printfFmt fmt (acc ++ show i)
+printfFmt (Str fmt)     acc = \str => printfFmt fmt (acc ++ str)
 printfFmt (Lit lit fmt) acc = printfFmt fmt (acc ++ lit)
-printfFmt End acc           = acc
+printfFmt End           acc = acc
 
 
 toFormat : (xs : List Char) -> Format
@@ -32,5 +32,5 @@ toFormat (c :: chars)          = case toFormat chars of
                                    fmt => Lit (strCons c "") fmt
  
 
-printf : (fmt : String) -> PrintfType (toFormat (unpack fmt))
+printf : (fmt : String) -> PrintfType $ toFormat (unpack fmt)
 printf fmt = printfFmt _ ""
