@@ -1,6 +1,8 @@
 module Printf
 
-
+||| E.g. "%s = % d"
+|||
+||| Str (Lit " = " (Number End))
 data Format = Number Format
             | Str Format
             | Lit String Format
@@ -32,5 +34,5 @@ toFormat (c :: chars)          = case toFormat chars of
                                    fmt => Lit (strCons c "") fmt
  
 
-printf : (fmt : String) -> PrintfType $ toFormat (unpack fmt)
+printf : (fmt : String) -> PrintfType $ toFormat (unpack fmt) 
 printf fmt = printfFmt _ ""
