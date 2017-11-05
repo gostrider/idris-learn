@@ -24,9 +24,10 @@ SchemaType (x .+. y) = (SchemaType x, SchemaType y)
 
 data Command : Schema -> Type where
   SetSchema : (newSchema : Schema) -> Command schema
-  Add  : SchemaType schema -> Command schema
-  Get  : Integer           -> Command schema
-  Quit :                      Command schema
+  Add    : SchemaType schema -> Command schema
+  Get    : Integer           -> Command schema
+  GetAll :                      Command schema
+  Quit   :                      Command schema
 
 
 
@@ -60,6 +61,7 @@ display {schema = SInt} item = show item
 display {schema = (x .+. y)} (iteml, itemr) = display iteml ++ ", " ++ display itemr
 
 
+getAllEntry : (store : DataStore) -> Maybe (String, DataStore)
 
 
 ||| Get item from data store
@@ -75,21 +77,22 @@ getEntry pos store =
 
 partial
 parsePrefix : (schema : Schema) -> String -> Maybe (SchemaType schema, String)
-parsePrefix SString input = getQuoted $ unpack input
+parsePrefix SString               input = getQuoted $ unpack input
   where
     getQuoted : List Char -> Maybe (String, String)
-    getQuoted ('"' :: xs) = case span (/= '"') xs of
-                              (quoted, '"' :: rest) => Just (pack quoted, ltrim $ pack rest)
-                              _                     => Nothing
+    getQuoted ('"' :: xs) =
+      case span (/= '"') xs of
+        (quoted, '"' :: rest) => Just (pack quoted, ltrim $ pack rest)
+        _                     => Nothing
     getQuoted _           = Nothing
 
-parsePrefix SChar input = case Strings.unpack input of
-                            [c] => Just (c, "")
-                            _ => Nothing
+parsePrefix SChar                 input = case unpack input of
+                                               [c] => Just (c, "")
+                                               _   => Nothing
 
-parsePrefix SInt input = case span isDigit input of
-                           ("", rest)  => Nothing
-                           (num, rest) => Just (cast num, ltrim rest)
+parsePrefix SInt                  input = case span isDigit input of
+                                            ("", rest)  => Nothing
+                                            (num, rest) => Just (cast num, ltrim rest)
 
 parsePrefix (schemal .+. schemar) input = case parsePrefix schemal input of
                                             Nothing              => Nothing
@@ -97,16 +100,6 @@ parsePrefix (schemal .+. schemar) input = case parsePrefix schemal input of
                                               case parsePrefix schemar input' of
                                                 Nothing               => Nothing
                                                 Just (r_val, input'') => Just ((l_val, r_val), input'')
-
-
-
-
-partial
-parseBySchema : (schema : Schema) -> String -> Maybe (SchemaType schema)
-parseBySchema schema input = case parsePrefix schema input of
-                                  Just (res, "") => Just res
-                                  Just _         => Nothing
-                                  Nothing        => Nothing
 
 
 
@@ -119,10 +112,10 @@ parseSchema ("String" :: xs) = case xs of
                                          Just xs_sch => Just (SString .+. xs_sch)
 
 parseSchema ("Char" :: xs)   = case xs of
-                                    [] => Just SChar
-                                    _ => case parseSchema xs of
-                                              Nothing => Nothing
-                                              Just xs_sch => Just (SChar .+. xs_sch)
+                                 [] => Just SChar
+                                 _  => case parseSchema xs of
+                                         Nothing     => Nothing
+                                         Just xs_sch => Just (SChar .+. xs_sch)
 
 parseSchema ("Int" :: xs)    = case xs of
                                  [] => Just SInt
@@ -134,17 +127,26 @@ parseSchema _                = Nothing
 
 
 
+parseBySchema : (schema : Schema) -> String -> Maybe (SchemaType schema)
+parseBySchema schema input = case parsePrefix schema input of
+                                  Just (res, "") => Just res
+                                  Just _         => Nothing
+                                  Nothing        => Nothing
+
+
+
+
 partial
 parseCommand : (schema : Schema) -> String -> String -> Maybe (Command schema)
 parseCommand schema "schema" rest = case parseSchema $ words rest of
                                       Nothing      => Nothing
                                       Just schema' => Just (SetSchema schema')
 
-parseCommand schema "add" rest    = case parseBySchema schema rest of
+parseCommand schema "add"    rest = case parseBySchema schema rest of
                                       Nothing    => Nothing
                                       Just rest' => Just (Add rest')
 
-parseCommand schema "get" val     = case all isDigit $ unpack val of
+parseCommand schema "get"    val  = case all isDigit $ unpack val of
                                       False => Nothing
                                       True  => Just (Get $ cast val)
 
@@ -156,7 +158,7 @@ parseCommand _      _      _      = Nothing
 
 partial
 parse : (schema : Schema) -> (input : String) -> Maybe (Command schema)
-parse schema input = case Strings.span (/= ' ') input of
+parse schema input = case span (/= ' ') input of
                        (cmd, args) => parseCommand schema cmd $ ltrim args
 
 
@@ -187,4 +189,4 @@ processInput store input =
 
 partial
 main : IO ()
-main = replWith (MkData (SString .+. SString .+. SInt) _ []) "Command: " processInput
+main = replWith (MkData (SString .+. SInt) _ []) "Command: " processInput
