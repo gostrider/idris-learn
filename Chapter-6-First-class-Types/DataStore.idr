@@ -24,10 +24,9 @@ SchemaType (x .+. y) = (SchemaType x, SchemaType y)
 
 data Command : Schema -> Type where
   SetSchema : (newSchema : Schema) -> Command schema
-  Add    : SchemaType schema -> Command schema
-  Get    : Integer           -> Command schema
-  GetAll :                      Command schema
-  Quit   :                      Command schema
+  Add    : SchemaType schema       -> Command schema
+  Get    : Maybe Integer           -> Command schema
+  Quit   :                            Command schema
 
 
 
@@ -61,7 +60,10 @@ display {schema = SInt} item = show item
 display {schema = (x .+. y)} (iteml, itemr) = display iteml ++ ", " ++ display itemr
 
 
-getAllEntry : (store : DataStore) -> Maybe (String, DataStore)
+getAllEntry : Nat -> Vect size (SchemaType schema) -> String
+getAllEntry idx [] = ""
+getAllEntry idx (x :: xs) = show idx ++ ": " ++ display x ++ "\n" ++
+                            getAllEntry (S idx) xs
 
 
 ||| Get item from data store
@@ -87,8 +89,8 @@ parsePrefix SString               input = getQuoted $ unpack input
     getQuoted _           = Nothing
 
 parsePrefix SChar                 input = case unpack input of
-                                               [c] => Just (c, "")
-                                               _   => Nothing
+                                            c :: cs => Just (c, ltrim $ pack cs)
+                                            []      => Nothing
 
 parsePrefix SInt                  input = case span isDigit input of
                                             ("", rest)  => Nothing
@@ -146,9 +148,11 @@ parseCommand schema "add"    rest = case parseBySchema schema rest of
                                       Nothing    => Nothing
                                       Just rest' => Just (Add rest')
 
+parseCommand schema "get"    ""   = Just (Get Nothing)
+
 parseCommand schema "get"    val  = case all isDigit $ unpack val of
                                       False => Nothing
-                                      True  => Just (Get $ cast val)
+                                      True  => Just (Get $ Just $ cast val)
 
 parseCommand schema "quit" _      = Just Quit
 parseCommand _      _      _      = Nothing
@@ -166,8 +170,8 @@ parse schema input = case span (/= ' ') input of
 
 setSchema : (store : DataStore) -> Schema -> Maybe DataStore
 setSchema store schema = case size store of
-                              Z   => Just (MkData schema _ [])
-                              S k => Nothing
+                              Z => Just $ MkData schema _ []
+                              _ => Nothing
 
 
 
@@ -177,7 +181,8 @@ processInput : (store : DataStore) -> (input : String) -> Maybe (String, DataSto
 processInput store input =
   case parse (schema store) input of
     Just Quit                => Nothing
-    Just (Get pos)           => getEntry pos store
+    Just (Get Nothing)       => Just (getAllEntry Z $ items store, store)
+    Just (Get (Just pos))    => getEntry pos store
     Nothing                  => Just ("Invalid command\n", store)
     Just (Add item)          => Just ("ID " ++ show (size store) ++ "\n", addToStore store item)
     Just (SetSchema schema') => case setSchema store schema' of
