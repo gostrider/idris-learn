@@ -60,21 +60,6 @@ display {schema = SInt} item = show item
 display {schema = (x .+. y)} (iteml, itemr) = display iteml ++ ", " ++ display itemr
 
 
-getAllEntry : Nat -> Vect size (SchemaType schema) -> String
-getAllEntry idx [] = ""
-getAllEntry idx (x :: xs) = show idx ++ ": " ++ display x ++ "\n" ++
-                            getAllEntry (S idx) xs
-
-
-||| Get item from data store
-getEntry : (pos : Integer) -> (store : DataStore) -> Maybe (String, DataStore)
-getEntry pos store =
-  let store_items = items store
-  in case integerToFin pos (size store) of
-      Nothing => Just ("out of range\n", store)
-      Just id => Just (display (index id $ items store) ++ "\n", store)
-
-
 
 
 partial
@@ -176,18 +161,37 @@ setSchema store schema = case size store of
 
 
 
+getAllEntry : Nat -> Vect size (SchemaType schema) -> String
+getAllEntry idx [] = ""
+getAllEntry idx (x :: xs) = show idx ++ ": " ++ display x ++ "\n" ++
+                            getAllEntry (S idx) xs
+
+
+
+
+||| Get item from data store
+getEntry : (pos : Integer) -> (store : DataStore) -> Maybe (String, DataStore)
+getEntry pos store =
+  let store_items = items store
+  in case integerToFin pos (size store) of
+      Nothing => Just ("out of range\n", store)
+      Just id => Just (display (index id $ items store) ++ "\n", store)
+
+
+
+
 partial
 processInput : (store : DataStore) -> (input : String) -> Maybe (String, DataStore)
 processInput store input =
   case parse (schema store) input of
     Just Quit                => Nothing
-    Just (Get Nothing)       => Just (getAllEntry Z $ items store, store)
     Just (Get (Just pos))    => getEntry pos store
-    Nothing                  => Just ("Invalid command\n", store)
+    Just (Get Nothing)       => Just (getAllEntry Z $ items store, store)
     Just (Add item)          => Just ("ID " ++ show (size store) ++ "\n", addToStore store item)
     Just (SetSchema schema') => case setSchema store schema' of
                                       Nothing     => Just ("Can't update schema\n", store)
                                       Just store' => Just ("OK\n", store')
+    Nothing                  => Just ("Invalid command\n", store)
 
 
 
