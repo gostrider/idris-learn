@@ -81,34 +81,26 @@ parsePrefix SInt                  input = case span isDigit input of
                                             ("", rest)  => Nothing
                                             (num, rest) => Just (cast num, ltrim rest)
 
-parsePrefix (schemal .+. schemar) input = case parsePrefix schemal input of
-                                            Nothing              => Nothing
-                                            Just (l_val, input') =>
-                                              case parsePrefix schemar input' of
-                                                Nothing               => Nothing
-                                                Just (r_val, input'') => Just ((l_val, r_val), input'')
+parsePrefix (schemal .+. schemar) input = do Just (l_val, input') <- return $ parsePrefix schemal input
+                                             Just (r_val, input'') <- return $ parsePrefix schemar input'
+                                             Just ((l_val, r_val), input'')
 
 
 
 
 parseSchema : List String -> Maybe Schema
-parseSchema ("String" :: xs) = case xs of
-                                 [] => Just SString
-                                 _  => case parseSchema xs of
-                                         Nothing     => Nothing
-                                         Just xs_sch => Just (SString .+. xs_sch)
+parseSchema ("String" :: []) = Just SString
+parseSchema ("String" :: xs) = do Just xs_sch <- return $ parseSchema xs
+                                  Just (SString .+. xs_sch)
 
-parseSchema ("Char" :: xs)   = case xs of
-                                 [] => Just SChar
-                                 _  => case parseSchema xs of
-                                         Nothing     => Nothing
-                                         Just xs_sch => Just (SChar .+. xs_sch)
+parseSchema ("Char"   :: []) = Just SChar
+parseSchema ("Char"   :: xs) = do Just xs_sch <- return $ parseSchema xs
+                                  Just (SChar .+. xs_sch)
 
-parseSchema ("Int" :: xs)    = case xs of
-                                 [] => Just SInt
-                                 _  => case parseSchema xs of
-                                         Nothing     => Nothing
-                                         Just xs_sch => Just (SInt .+. xs_sch)
+parseSchema ("Int"    :: []) = Just SInt
+parseSchema ("Int"    :: xs) = do Just xs_sch <- return $ parseSchema xs
+                                  Just (SInt .+. xs_sch)
+
 parseSchema _                = Nothing
 
 
@@ -125,13 +117,11 @@ parseBySchema schema input = case parsePrefix schema input of
 
 partial
 parseCommand : (schema : Schema) -> String -> String -> Maybe (Command schema)
-parseCommand schema "schema" rest = case parseSchema $ words rest of
-                                      Nothing      => Nothing
-                                      Just schema' => Just (SetSchema schema')
+parseCommand schema "schema" rest = do Just schema' <- return $ parseSchema $ words rest
+                                       Just (SetSchema schema')
 
-parseCommand schema "add"    rest = case parseBySchema schema rest of
-                                      Nothing    => Nothing
-                                      Just rest' => Just (Add rest')
+parseCommand schema "add"    rest = do Just rest' <- return $ parseBySchema schema rest
+                                       Just (Add rest')
 
 parseCommand schema "get"    ""   = Just (Get Nothing)
 
