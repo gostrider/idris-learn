@@ -33,14 +33,14 @@ collection = [help, rubbersoul, clouds, hunkydory, heroes]
 
 
 Eq Album where
-  (==) (MkAlbum artist title year) (MkAlbum artist' title' year')
-           = artist == artist' && title == title' && year == year'
+  (==) (MkAlbum artist title year) (MkAlbum artist' title' year') =
+    artist == artist' && title == title' && year == year'
 
 
 Ord Album where
   compare (MkAlbum artist title year) (MkAlbum artist' title' year') =
-    case compare artist artist' of
-      EQ => case compare year year' of
-        EQ => compare title title'
-        diff_year => diff_year
+    case compare artist artist' of       -- compare artist equals
+      EQ => case compare year year' of     -- compare year equals
+        EQ          => compare title title'  -- compare title equals
+        diff_year   => diff_year
       diff_artist => diff_artist

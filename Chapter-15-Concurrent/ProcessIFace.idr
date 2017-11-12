@@ -12,7 +12,7 @@ data ProcState = NoRequest | Sent | Complete
 data Fuel = Dry | More (Lazy Fuel)
 
 
-data MessagePID  : (iface : reqType -> Type) -> Type where
+data MessagePID : (iface : reqType -> Type) -> Type where
   MkMessage : PID -> MessagePID iface
 
 
@@ -61,18 +61,24 @@ Service : (iface : reqType -> Type) -> Type -> Type
 
 run : Fuel -> Process iface t in_state out_state -> IO (Maybe t)
 run fuel (Request {service_iface} (MkMessage process) msg) = do
-  Just chan <- connect process | _ => pure Nothing
+  Just chan <- connect process
+    | _ => pure Nothing
   ok <- unsafeSend chan msg
   if ok
     then do
-      Just x <- unsafeRecv (service_iface msg) chan | Nothing => pure Nothing
+      Just x <- unsafeRecv (service_iface msg) chan
+        | Nothing => pure Nothing
       pure $ Just x
     else
       pure Nothing
 run fuel (Respond {reqType} f) = do
-  Just sender <- listen 1 | Nothing => pure (Just Nothing)
-  Just msg <- unsafeRecv reqType sender | Nothing => pure (Just Nothing)
-  Just res <- run fuel (f msg) | Nothing => pure Nothing
+  Just sender <- listen 1
+    | Nothing => pure (Just Nothing)
+  Just msg <- unsafeRecv reqType sender
+    | Nothing => pure (Just Nothing)
+  Just res <- run fuel (f msg)
+    | Nothing => pure Nothing
+
   unsafeSend sender res
   pure (Just (Just msg))
 
