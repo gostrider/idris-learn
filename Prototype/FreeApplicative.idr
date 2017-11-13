@@ -1,16 +1,20 @@
 module FreeApplicative
 
-data FAp : (f : Type -> Type) -> a -> Type where
-  Pure : a -> FAp f a
-  Ap : f a -> FAp f (a -> b) -> FAp f b
+
+public export
+data Free : (f : a -> b) -> a -> Type where
+  Pure : a -> Free f a
+  Ap : f a -> Free f (a -> b) -> Free f b
 
 
-Functor (FAp f) where
+public export
+Functor f => Functor (Free f) where
   map f (Pure x) = Pure $ f x
   map f (Ap x y) = Ap x $ (f .) <$> y
 
 
-Applicative (FAp f) where
+public export
+Functor f => Applicative (Free f) where
   pure = Pure
-  (Pure f') <*> x  = map f' x
-  (Ap x f') <*> x' = Ap x $ flip <$> f' <*> x'
+  (<*>) (Pure f') x  = map f' x
+  (<*>) (Ap x f') x' = Ap x $ flip <$> f' <*> x'
