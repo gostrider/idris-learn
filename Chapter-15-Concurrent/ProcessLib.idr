@@ -55,19 +55,24 @@ forever = More forever
 export
 run : Fuel -> Process iface t in_state out_state -> IO (Maybe t)
 run fuel (Request {service_iface} (MkMessage process) msg) = do
-  Just chan <- connect process | _ => pure Nothing
+  Just chan <- connect process
+    | _ => pure Nothing
   ok        <- unsafeSend chan msg
   if ok
     then do
-      Just x <- unsafeRecv (service_iface msg) chan | Nothing => pure Nothing
+      Just x <- unsafeRecv (service_iface msg) chan
+        | Nothing => pure Nothing
       pure (Just x)
     else
       pure Nothing
 
 run fuel (Respond {reqType} f) = do
-  Just sender <- listen 1                  | Nothing => pure (Just Nothing)
-  Just msg    <- unsafeRecv reqType sender | Nothing => pure (Just Nothing)
-  Just res    <- run fuel $ f msg          | Nothing => pure Nothing
+  Just sender <- listen 1
+    | Nothing => pure (Just Nothing)
+  Just msg    <- unsafeRecv reqType sender
+    | Nothing => pure (Just Nothing)
+  Just res    <- run fuel $ f msg
+    | Nothing => pure Nothing
   unsafeSend sender res
   pure $ Just $ Just msg
 
@@ -77,13 +82,13 @@ run fuel (Spawn proc) = do
     | Nothing => pure (Just Nothing)
   pure $ Just $ Just $ MkMessage pid
 
-run (More fuel) (Loop proc) = run fuel proc
-run fuel (Action action) = action >>= \res => pure $ Just res
-run fuel (Pure x) = pure $ Just x
-run fuel (action >>= next) = do
-  Just action' <- run fuel action | Nothing => pure Nothing
-  run fuel $ next action'
-run Dry _ = pure Nothing
+run (More fuel) (Loop proc)       = run fuel proc
+run fuel        (Action action)   = action >>= \res => pure $ Just res
+run fuel        (Pure x)          = pure $ Just x
+run fuel        (action >>= next) = do Just action' <- run fuel action
+                                         | Nothing => pure Nothing
+                                       run fuel $ next action'
+run Dry         _                 = pure Nothing
 
 
 public export
