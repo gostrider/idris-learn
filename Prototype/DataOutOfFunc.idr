@@ -15,11 +15,15 @@ data Encoding = CBool Bool
               | COr Encoding Encoding
 
 
-andTerms : (x : Encoding) -> (y : Encoding) -> Encoding
-andTerms x y = ?andTerms_rhs
+andTerms : Bool -> Bool -> Encoding
+andTerms True y = CBool y
+andTerms x True = CBool x
 
 
-orTerms : (x : Encoding) -> (y : Encoding) -> Encoding
+orTerms : Bool -> Bool -> Encoding
+orTerms x True = CBool True
+orTerms True y = CBool True
+orTerms _    _ = CBool False
 
 
 eval : Encoding -> Bool
@@ -29,8 +33,8 @@ eval (CFalse _ y)        = eval $ CBool y
 eval (CNot (CNot x))     = eval x
 eval (CNot (CTrue x y))  = eval $ CFalse x y
 eval (CNot (CFalse x y)) = eval $ CTrue x y
-eval (CAnd x y)          = eval $ andTerms x y
-eval (COr x y)           = eval $ orTerms x y
+eval (CAnd x y)          = eval $ andTerms (eval x) (eval y)
+eval (COr x y)           = eval $ orTerms (eval x) (eval y)
 
 
 -- CBool : forall r . r -> r -> r
