@@ -61,13 +61,43 @@ snd : ((Bool -> Bool -> Bool) -> Bool -> Bool -> Bool) -> Bool -> Bool -> Bool
 snd f x y = f fls x y
 
 
+c0 : (Int -> Int) -> Int -> Int
+c0 f = id
+
+
+c1 : (Int -> Int) -> Int -> Int
+c1 f = f
+
+
+c2 : (Int -> Int) -> Int -> Int
+c2 f = f . f
+
+
+cSucc : ((Int -> Int) -> Int -> Int) -> ((Int -> Int) -> Int -> Int)
+cSucc cn f = f . cn f
 
 
 
 
 
+{-
 
+c0 = lambda s: lambda z: z
 
+lambda n: (Int -> Int) -> Int
+lambda s: (+1)
+lambda z: 0
+
+succ            = lambda n: lambda s: lambda z: s( (n)(s)(z) )
+succ(c0)        = lambda s: lambda z: s( c0(s)(z) )
+succ(c0)(+1)    = lambda z: (+1)( c0(+1)(z) )
+succ(c0)(+1)(0) = (+1)( c0(+1)(0) )
+                = c1
+(c1)        = lambda s: lambda z: s( succ(c0)(s)(z) )
+(c1)(+1)    = lambda z: (+1)( succ(c0)(+1)(z) )
+(c1)(+1)(0) = (+1)( succ(c0)(+1)(0) )
+            = 2
+-}
 
 
 
