@@ -50,10 +50,10 @@ cMult : ((Int -> Int) -> Int -> Int) ->
 cMult cm cn = cm . cn
 
 
-cExp : ((Int -> Int) -> Int -> Int) ->
-       ((Int -> Int) -> Int -> Int) ->
-       ((Int -> Int) -> Int -> Int)
-cExp cm cn = ?rhs_cexp
+-- cExp : ((Int -> Int) -> Int -> Int) ->
+--        ((Int -> Int) -> Int -> Int) ->
+--        ((Int -> Int) -> Int -> Int)
+-- cExp cm cn f z = cm cn f z
 
 
 {-

@@ -20,10 +20,10 @@ Fold.Foldable List where
 
 Fold.Foldable Tree  where
   foldr f acc Empty = ?rhs_1
-  foldr f acc (Node left e right) = let leftfold = foldr f acc left
-                                        rightfold = foldr f leftfold right
-                                    in
-                                      f e rightfold
+  foldr f acc (Node left e right) =
+    let leftfold = foldr f acc left
+        rightfold = foldr f leftfold right
+    in f e rightfold
 
 
 totalLen : List String -> Nat

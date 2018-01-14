@@ -12,7 +12,7 @@ interface Functor (f : Type -> Type) where
   map : (func : a -> b) -> f a -> f b
 
 
-interface StateMonad.Functor f => APplicative (f : Type -> Type) where
+interface StateMonad.Functor f => Applicative (f : Type -> Type) where
   pure : a -> f a
   (<*>) : f (a -> b) -> f a -> f b
 
