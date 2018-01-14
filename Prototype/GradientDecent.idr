@@ -57,10 +57,10 @@ normalizedPrice : List Double
 normalizedPrice = normalise housePriceSample
 
 
-gradient :: Double -> Double -> Double -> (Double, Double, Double)
-gradient weight_a weight_b learning_rate =
+gradient : Double -> Double -> Double -> (Double, Double, Double)
+gradient weightA weightB learningRate =
     let
-        pricePred = map (yPrediction weight_a weight_b) normalizedPrice
+        pricePred = map (yPrediction weightA weightB) normalizedPrice
         err = errorFunc normalizedPrice pricePred
 
         dA y yp = -(y - yp)
@@ -69,19 +69,24 @@ gradient weight_a weight_b learning_rate =
         dA' = applyA2 dA normalizedPrice pricePred
         dB' = applyA2 dB normalizedSize dA'
 
-        dA'Sum = sum dA' :: Double
-        dB'Sum = sum dB' :: Double
+        dA'Sum : Double
+        dA'Sum = sum dA'
 
-        a' = updateWeigth weight_a learning_rate sqErr dA'Sum
-        b' = updateWeigth weight_b learning_rate sqErr dB'Sum
+        dB'Sum : Double
+        dB'Sum = sum dB'
+
+        a' = updateWeigth weightA learningRate err dA'Sum
+        b' = updateWeigth weightB learningRate err dB'Sum
     in
         (err, a', b')
 
 -- optmise 214 0.45 0.75 0
-optmise :: Int -> Double -> Double -> Double -> IO ()
-optmise 0 _ _ err = do
+optmise : Int -> Double -> Double -> Double -> Double -> IO ()
+optmise 0 _ _ err state = do
     print ("Final: " ++ show err)
-optmise count weightA weightB err = do
+optmise count weightA weightB err state = do
     let (e, a', b') = gradient weightA weightB 0.01
     -- print ("step " ++ show count ++ ", error " ++ show e)
-    optmise (count - 1) a' b' e
+    if e < state
+    then optmise (count - 1) a' b' e e
+    else optmise 0 a' b' e e
