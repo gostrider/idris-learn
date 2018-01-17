@@ -1,5 +1,7 @@
 module GradientDecent
 
+import Data.Vect
+
 houseSizeSample : List Double
 houseSizeSample =
     [ 1100, 1400, 1425, 1550, 1600
@@ -26,9 +28,9 @@ minMaxNormalise min' max' n =
 
 normalise : List Double -> List Double
 normalise axis =
-    let min' = minimum axis
-        max' = maximum axis
-    in map (minMaxNormalise min' max') axis
+  let Just min' = head' $ sort axis
+      Just max' = last' $ sort axis
+  in map (minMaxNormalise min' max') axis
 
 
 yPrediction : Double -> Double -> Double -> Double
@@ -59,26 +61,20 @@ normalizedPrice = normalise housePriceSample
 
 gradient : Double -> Double -> Double -> (Double, Double, Double)
 gradient weightA weightB learningRate =
-    let
-        pricePred = map (yPrediction weightA weightB) normalizedPrice
-        err = errorFunc normalizedPrice pricePred
+  let
+    pricePred = map (yPrediction weightA weightB) normalizedPrice
+    err = errorFunc normalizedPrice pricePred
 
-        dA y yp = -(y - yp)
-        dB x dA = dA * x
+    -- dA y yp = -(y - yp)
+    -- dB x dA = dA * x
 
-        dA' = applyA2 dA normalizedPrice pricePred
-        dB' = applyA2 dB normalizedSize dA'
+    -- derivativeOfA = applyA2 dA normalizedPrice pricePred
+    -- derivativeOfB = applyA2 dB normalizedSize derivativeOfA
 
-        dA'Sum : Double
-        dA'Sum = sum dA'
-
-        dB'Sum : Double
-        dB'Sum = sum dB'
-
-        a' = updateWeigth weightA learningRate err dA'Sum
-        b' = updateWeigth weightB learningRate err dB'Sum
-    in
-        (err, a', b')
+    -- a' = updateWeigth weightA learningRate err (sum derivativeOfA)
+    -- b' = updateWeigth weightB learningRate err (sum derivativeOfB)
+  in
+    (err, weightA, weightB)
 
 -- optmise 214 0.45 0.75 0
 optmise : Int -> Double -> Double -> Double -> Double -> IO ()
