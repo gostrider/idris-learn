@@ -16,6 +16,7 @@ area (Rectangle x y) = rectangle_area x y
 area (Circle x) = pi * x * x
 
 
+-- Exercis 7.1.1
 Eq Shape where
   (==) (Triangle x  y) (Triangle x'  y') = x == x' && y == y'
   (==) (Rectangle x y) (Rectangle x' y') = x == x' && y == y'
@@ -25,6 +26,7 @@ Eq Shape where
   x /= y = not $ x == y
 
 
+-- Exercis 7.1.2
 Ord Shape where
   compare x y = (area x) `compare` (area y)
 

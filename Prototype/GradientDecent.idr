@@ -59,22 +59,25 @@ normalizedPrice : List Double
 normalizedPrice = normalise housePriceSample
 
 
-gradient : Double -> Double -> Double -> (Double, Double, Double)
+dA : (Num x, Neg x) => x -> x -> x
+dA y yp = -(y - yp)
+
+dB : (Num x, Neg x) => x -> x -> x
+dB x dA' = dA' * x
+
+gradient : (Num x, Neg x) => (x : Integer) -> x -> x -> (x, x, x)
 gradient weightA weightB learningRate =
   let
     pricePred = map (yPrediction weightA weightB) normalizedPrice
     err = errorFunc normalizedPrice pricePred
 
-    -- dA y yp = -(y - yp)
-    -- dB x dA = dA * x
+    derivativeOfA = applyA2 dA normalizedPrice pricePred
+    derivativeOfB = applyA2 dB normalizedSize derivativeOfA
 
-    -- derivativeOfA = applyA2 dA normalizedPrice pricePred
-    -- derivativeOfB = applyA2 dB normalizedSize derivativeOfA
-
-    -- a' = updateWeigth weightA learningRate err (sum derivativeOfA)
-    -- b' = updateWeigth weightB learningRate err (sum derivativeOfB)
+    a' = updateWeigth weightA learningRate err (sum derivativeOfA)
+    b' = updateWeigth weightB learningRate err (sum derivativeOfB)
   in
-    (err, weightA, weightB)
+    (err, a', b')
 
 -- optmise 214 0.45 0.75 0
 optmise : Int -> Double -> Double -> Double -> Double -> IO ()

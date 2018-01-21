@@ -39,7 +39,7 @@ MatterEq elem => MatterEq (Tree elem) where
     left == left' && x == y && right == right'
   (==) _ _ = False
 
-  (/=) x y = ?MatterEq_rhs_2
+  (/=) x y = not $ x == y
 
 
 -- occurrences Solid [Solid, Gas, Liquid, Solid]

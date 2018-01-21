@@ -1,5 +1,7 @@
 module Printf
 
+||| Exercise 6.2.2
+||| Support Char & Double
 ||| E.g. "%s = % d"
 |||
 ||| Str (Lit " = " (Number End))
@@ -11,6 +13,7 @@ data Format = Number Format
             | End
 
 %name Format fmt
+
 
 PrintfType : Format -> Type
 PrintfType (Number  fmt) = (i   : Int)    -> PrintfType fmt

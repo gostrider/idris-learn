@@ -11,7 +11,8 @@ data Schema = SString
 
 
 
-
+||| Exercise 6.3.1
+||| Add support for Char
 SchemaType : Schema -> Type
 SchemaType SInt = Int
 SchemaType SChar = Char
@@ -149,7 +150,11 @@ setSchema store schema = case size store of
 
 getAllEntry : Nat -> Vect size (SchemaType schema) -> String
 getAllEntry idx [] = ""
-getAllEntry idx (x :: xs) = show idx ++ ": " ++ display x ++ "\n" ++ getAllEntry (S idx) xs
+getAllEntry idx (x :: xs) = show idx
+                              ++ ": "
+                              ++ display x
+                              ++ "\n"
+                              ++ getAllEntry (S idx) xs
 
 
 
