@@ -16,10 +16,10 @@ data StackCmd : Type -> Nat -> Nat -> Type where
 
 runStack : (stk : Vect inHeight Integer) ->
            StackCmd ty inHeight outHeight -> (ty, Vect outHeight Integer)
-runStack stk (Push val) = ((), val :: stk)
-runStack (val :: stk) Pop = (val, stk)
-runStack (val :: stk) Top = (val, val :: stk)
-runStack stk (Pure x) = (x, stk)
+runStack stk (Push val)     = ((), val :: stk)
+runStack (val :: stk) Pop   = (val, stk)
+runStack (val :: stk) Top   = (val, val :: stk)
+runStack stk (Pure x)       = (x, stk)
 runStack stk (cmd >>= next) = let (cmdRes, stk') = runStack stk cmd
                               in runStack stk' $ next cmdRes
 

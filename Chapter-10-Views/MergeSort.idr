@@ -26,7 +26,7 @@ splitList input = splitListHelp input input
       case splitListHelp counter items of
         SplitNil => SplitOne
         SplitOne {x} => SplitPair [item] [x]
-        (SplitPair lefts rights) => SplitPair (item :: lefts) rights
+        SplitPair lefts rights => SplitPair (item :: lefts) rights
     splitListHelp _ items = SplitPair [] items
 
 

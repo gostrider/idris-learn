@@ -14,7 +14,7 @@ isDoorJam Jammed = DoorClosed
 
 
 data DoorCmd : (ty : Type) -> DoorState -> (ty -> DoorState) -> Type where
-  Open : DoorCmd DoorResult DoorClosed DoorJam.isDoorJam
+  Open     : DoorCmd DoorResult DoorClosed DoorJam.isDoorJam
   Close    : DoorCmd () DoorOpen   (const DoorClosed)
   RingBell : DoorCmd () DoorClosed (const DoorClosed)
   Display  : String ->

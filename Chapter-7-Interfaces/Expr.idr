@@ -61,5 +61,15 @@ eval (Abs x)   = abs $ eval x
 
 
 -- Exercise 7.2.3
-Cast (Expr ty) ToType where
-  case from = ?holeTo
+(Integral ty, Neg ty, Abs ty) => Cast (Expr ty) ty where
+  cast orig = eval orig
+
+
+-- Exercise 7.3.1
+Functor Expr where
+  map f (Val x) = Val (f x)
+  map f (Add x y) = Add (map f x) (map f y)
+  map f (Sub x y) = Sub (map f x) (map f y)
+  map f (Mul x y) = Mul (map f x) (map f y)
+  map f (Div x y) = Div (map f x) (map f y)
+  map f (Abs x) = Abs (map f x)
