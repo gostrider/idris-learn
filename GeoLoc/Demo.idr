@@ -2,49 +2,41 @@ module Demo
 
 import Zone
 import Criteria
-
-zone1 : Zone
-zone1 = MkZone 1 2.0 True
+import DB
 
 
-zone2 : Zone
-zone2 = MkZone 2 2.0 True
+record ActionParams where
+  constructor MkParams
+  criteria : Criteria
+  user_id : UserID
+  timestamp : Timestamp
 
 
-userZone1 : ZoneActivity
-userZone1 = MkActivity
-  zone True phone user
-  create update enter leave
-  where
-    zone   = zone1
-    phone  = 1
-    user   = 1
-    create = 1
-    update = 1
-    enter  = 1
-    leave  = Nothing
+parseTimestamp : Integer -> Timestamp
+parseTimestamp x =
+  if x < 11
+    then (ValidTimestamp x)
+    else InvalidTimestamp
 
 
-userZone2 : ZoneActivity
-userZone2 = MkActivity
-  zone True phone user
-  create update enter leave
-  where
-    zone   = zone2
-    phone  = 2
-    user   = 2
-    create = 2
-    update = 2
-    enter  = 2
-    leave  = Nothing
+parseParams : String -> Integer -> Integer -> ActionParams
+parseParams criteriaStr userID timestamp =
+  let
+    Just criteria' = Criteria.parseCriteria criteriaStr
+    Just user = List.find (\u => idx u == userID) DB.users
+    userID' = ValidUserID $ User.idx user
+    time = parseTimestamp timestamp
+  in
+    MkParams criteria' userID' time
 
 
-someEntry : List UserZoneActivity
-someEntry
-  = [ Enter userZone1
-    , Enter userZone2
-      -- Leave
-    ]
+matchCriteriaWith : ActionParams -> List DeviceID
+matchCriteriaWith params = ?matchCriteriaWith_rhs
+
+
+program : List DeviceID
+program =
+  ?match_rhs $ parseParams "first_in" 1 1
 
 {-
 
