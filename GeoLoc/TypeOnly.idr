@@ -66,40 +66,38 @@ store =
   ]
 
 
-data ValidEntry : Store -> Vect len Store -> Type where
-  ValidPhone : ValidEntry (CreatePhone p) ((CreatePhone p) :: ss)
+ensureEntry : (s : a) -> (xs : Vect (S n) a) -> {auto prf : Elem s xs} -> a
+ensureEntry             s (s :: xs) {prf = Here       } = s
+ensureEntry {n = Z    } s (x :: []) {prf = There later} = absurd later
+ensureEntry {n = (S k)} s (x :: xs) {prf = There later} = ensureEntry s xs
 
 
-notExistsPhone : (x : Integer) -> Elem (CreatePhone p) [] -> Void
-
-
-findPhone : Integer -> (stores : Vect len Store) -> Dec (ValidEntry (CreatePhone p) stores)
-findPhone x [] = No ?findPhone_rhs_1
-findPhone x ((CreatePhone p) :: xs) = case decEq x (idx p) of
-                                           (Yes prf) => ?next_1
-                                           (No contra) => ?next_2
-
-
-%name CreateZone zone
-addToStore : (elem : Store) -> (stores : Vect len Store) -> Vect (S len) Store
-addToStore (CreateZone zone) stores = ?addToStore_rhs_1
+total
+findPhone : Integer -> (stores : Vect len Store) -> Maybe Store
+findPhone x store = find findPhoneInner store
   where
-    ensurePhone : Dec (Elem ?phone_record stores)
-addToStore elem stores = elem :: stores
+    findPhoneInner : Store -> Bool
+    findPhoneInner (CreatePhone p) =
+      if x == idx p then True else False
+    findPhoneInner _ = False
 
 
-
-parseParams
-  : (criteria    : String) ->
-    (user_id     : Integer) ->
-    (location_id : Integer) ->
-    (timestamp   : Integer) ->
-    Params
-
-
-%name Params params
-matchCriteriaWith : Params -> List Device
-matchCriteriaWith params = ?matchCriteriaWith_rhs
-
-
-main : IO ()
+test : Store
+test =
+  ensureEntry (CreatePhone $ MkPhone 1 "phone_1") store
+--
+--
+-- parseParams
+--   : (criteria    : String) ->
+--     (user_id     : Integer) ->
+--     (location_id : Integer) ->
+--     (timestamp   : Integer) ->
+--     Params
+--
+--
+-- %name Params params
+-- matchCriteriaWith : Params -> List Device
+-- matchCriteriaWith params = ?matchCriteriaWith_rhs
+--
+--
+-- main : IO ()
