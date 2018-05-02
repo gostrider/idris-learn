@@ -3,6 +3,8 @@ module TypeOnly
 import Data.Vect
 
 
+%default total
+
 data Criteria = FirstIn | LastOut | ACOn | ACOff | Always
 
 
@@ -48,21 +50,12 @@ record Params where
   timestamp : Timestamp
 
 
-data Store
+data StoreEntry
   = CreateZone Zone
   | CreateLocation Location
   | CreateDevice Device
   | CreatePhone Phone
   | CreateUser User
-
-
-store : Vect 4 Store
-store =
-  [ CreateLocation $ MkLocation 1 "location_1"
-  , CreateUser $ MkUser 1 "user_1"
-  , CreatePhone $ MkPhone 1 "phone_1"
-  , CreateZone $ MkZone 1 1 1
-  ]
 
 
 data StoreRef
@@ -71,33 +64,7 @@ data StoreRef
   | LocationRef Integer
 
 
-matchField : StoreRef -> Store -> Bool
-matchField (LocationRef locRef) (CreateLocation l) = locRef == idx l
-matchField (PhoneRef phoneRef)  (CreatePhone p)    = phoneRef == idx p
-matchField (UserRef usrRef)     (CreateUser u)     = usrRef == idx u
-matchField _                    _                  = False
-
-
-matchCriteria : String -> Maybe Criteria
-matchCriteria "first_in" = Just FirstIn
-matchCriteria "last_out" = Just LastOut
-matchCriteria "ac_on"    = Just ACOn
-matchCriteria "ac_off"   = Just ACOff
-matchCriteria "always"   = Just Always
-matchCriteria _          = Nothing
-
-
-ensure : (s : a) -> (xs : Vect (S n) a) -> {auto prf : Elem s xs} -> a
-ensure             s (s :: xs) {prf = Here       } = s
-ensure {n = Z    } s (x :: []) {prf = There later} = absurd later
-ensure {n = (S k)} s (x :: xs) {prf = There later} = ensure s xs
-
-
--- test : Store
--- test = ensure (CreatePhone $ MkPhone 1 "phone_1") store
-
-
-Eq Store where
+Eq StoreEntry where
   (CreateZone (MkZone x1 x2 x3)) == (CreateZone (MkZone y1 y2 y3)) =
     x1 == y1 && x2 == y2 && x3 == y3
 
@@ -116,7 +83,7 @@ Eq Store where
   _ == _ = False
 
 
-DecEq Store where
+DecEq StoreEntry where
   decEq x y = case x == y of
                 True => Yes storeEq
                 False => No storeNotEq
@@ -128,48 +95,85 @@ DecEq Store where
       storeNotEq = really_believe_me $ id {a = x = y}
 
 
-testEntryExists : Maybe Store -> Maybe Store
-testEntryExists (Just x) =
+store : Vect 4 StoreEntry
+store =
+  [ CreateLocation $ MkLocation 1 "location_1"
+  , CreateUser $ MkUser 1 "user_1"
+  , CreatePhone $ MkPhone 1 "phone_1"
+  , CreateZone $ MkZone 1 1 1
+  ]
+
+
+matchEntry : StoreRef -> StoreEntry -> Bool
+matchEntry (LocationRef locRef) (CreateLocation l) = locRef == idx l
+matchEntry (PhoneRef phoneRef)  (CreatePhone p)    = phoneRef == idx p
+matchEntry (UserRef usrRef)     (CreateUser u)     = usrRef == idx u
+matchEntry _                    _                  = False
+
+
+matchCriteria : String -> Maybe Criteria
+matchCriteria "first_in" = Just FirstIn
+matchCriteria "last_out" = Just LastOut
+matchCriteria "ac_on"    = Just ACOn
+matchCriteria "ac_off"   = Just ACOff
+matchCriteria "always"   = Just Always
+matchCriteria _          = Nothing
+
+
+ensure : (s : a) -> (xs : Vect (S n) a) -> {auto prf : Elem s xs} -> a
+ensure             s (s :: xs) {prf = Here       } = s
+ensure {n = Z    } s (x :: []) {prf = There later} = absurd later
+ensure {n = (S k)} s (x :: xs) {prf = There later} = ensure s xs
+
+
+test : StoreEntry
+test = ensure (CreatePhone $ MkPhone 1 "phone_1") store
+
+
+proofEntryExists : Maybe StoreEntry -> Maybe StoreEntry
+proofEntryExists (Just x) =
   case isElem x store of
     (Yes prf)   => Just $ ensure x store
     (No contra) => Nothing
-testEntryExists Nothing = Nothing
+proofEntryExists Nothing = Nothing
 
 
-toUser : Maybe Store -> Maybe User
+exist : StoreRef -> Maybe StoreEntry
+exist x = proofEntryExists $ find (matchEntry x) store
+
+
+toUser : Maybe StoreEntry -> Maybe User
 toUser (Just (CreateUser u)) = Just u
 toUser _                     = Nothing
 
 
-toLocation : Maybe Store -> Maybe Location
+toLocation : Maybe StoreEntry -> Maybe Location
 toLocation (Just (CreateLocation l)) = Just l
 toLocation _                         = Nothing
 
 
 parseParams
-  : (criteria    : String) ->
-    (user_id     : Integer) ->
+  : (criteria : String) ->
+    (user_id : Integer) ->
     (location_id : Integer) ->
-    (timestamp   : Integer) ->
+    (timestamp : Integer) ->
     Maybe Params
 parseParams criteria' userID' locationID' timestamp' =
   MkParams
-    <$> toUser ensureUser         <*> ensureCriteria
-    <*> toLocation ensureLocation <*> ensureTime
+    <$> ensureUser (UserRef userID') <*> ensureCriteria
+    <*> ensureLocation (LocationRef locationID') <*> ensureTime
   where
-    ensureLocation : Maybe Store
-    ensureLocation =
-      testEntryExists $ find (matchField $ LocationRef locationID') store
+    ensureLocation : StoreRef -> Maybe Location
+    ensureLocation = toLocation . exist
 
-    ensureUser : Maybe Store
-    ensureUser =
-      testEntryExists $ find (matchField $ UserRef userID') store
+    ensureUser : StoreRef -> Maybe User
+    ensureUser = toUser . exist
 
     ensureCriteria : Maybe Criteria
     ensureCriteria = matchCriteria criteria'
 
     ensureTime : Maybe Timestamp
-    ensureTime = Just $ ValidTimestamp timestamp'
+    ensureTime = Just (ValidTimestamp timestamp')
 
 
 -- %name Params params
