@@ -69,10 +69,13 @@ run fuel (Request {service_iface} (MkMessage process) msg) = do
 run fuel (Respond {reqType} f) = do
   Just sender <- listen 1
     | Nothing => pure (Just Nothing)
+
   Just msg    <- unsafeRecv reqType sender
     | Nothing => pure (Just Nothing)
+
   Just res    <- run fuel $ f msg
     | Nothing => pure Nothing
+
   unsafeSend sender res
   pure $ Just $ Just msg
 

@@ -7,6 +7,7 @@ data Message = Add Nat Nat
 
 adder : IO ()
 adder = do
+  -- Cannot reuse the channel
   Just sender_chan <- listen 1
     | Nothing => adder
   Just msg <- unsafeRecv Message sender_chan
@@ -20,6 +21,7 @@ adder = do
 
 main : IO ()
 main = do
+  -- spwan process
   Just adder_id <- spawn adder
     | Nothing => putStrLn "Spawn failed"
 
@@ -28,6 +30,7 @@ main = do
 
   ok <- unsafeSend chan (Add 2 3)
 
+  -- Recevice message type not guarantee
   Just answer <- unsafeRecv Nat chan
     | Nothing => putStrLn "Send failed"
 

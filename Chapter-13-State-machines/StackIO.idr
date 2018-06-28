@@ -94,11 +94,11 @@ mutual
   stackCalc = do PutStr "> "
                  input <- GetStr
                  case strToInput input of
-                   Nothing => do PutStr "Invalid input \n"
-                                 stackCalc
+                   Nothing         => do PutStr "Invalid input \n"
+                                         stackCalc
                    Just (Number x) => do Push x
                                          stackCalc
-                   Just Add => tryAdd
+                   Just Add        => tryAdd
 
 main : IO ()
 main = run forever [] stackCalc
